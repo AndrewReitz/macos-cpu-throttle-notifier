@@ -44,16 +44,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
 
             if data.count > 0 {
                 if let str = String(data: data, encoding: String.Encoding.utf8) {
-                    let result = regex.firstMatch(in:str, range:NSMakeRange(0, str.count))!
-                    let matchedLimit = result.range(at: 1)
-                    let range = Range(matchedLimit, in: str)
-                    let cpuLimit = Int(str[range!])!
-                    if (cpuLimit < 95 && !self.throttled) {
-                        self.showThrottledNotification()
-                        self.throttled = true
-                    } else if (cpuLimit >= 95 && self.throttled) {
-                        self.showNormalNotification()
-                        self.throttled = false
+                    if let result = regex.firstMatch(in:str, range:NSMakeRange(0, str.count)) {
+                        let matchedLimit = result.range(at: 1)
+                        let range = Range(matchedLimit, in: str)
+                        let cpuLimit = Int(str[range!])!
+                        if (cpuLimit < 95 && !self.throttled) {
+                            self.showThrottledNotification()
+                            self.throttled = true
+                        } else if (cpuLimit >= 95 && self.throttled) {
+                            self.showNormalNotification()
+                            self.throttled = false
+                        }
                     }
                 }
                 outHandle.waitForDataInBackgroundAndNotify()
