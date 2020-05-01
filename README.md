@@ -11,6 +11,8 @@ I noticed my computer seemed to run faster when I had a box fan next too it.
 Now I know when I need to have that box fan running and if I need to turn it
 up to a hire speed.
 
+More Info [Here](https://andrewreitz.com/tech_blog/macbook-thermal-throttling/)
+
 ## Note
 
 I am an Android developer, and just whipped this up from code snippets
