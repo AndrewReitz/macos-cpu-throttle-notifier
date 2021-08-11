@@ -12,12 +12,16 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDelegate {
 
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
+    let statusMenuItem = NSMenuItem(title: "Initializing...", action: nil, keyEquivalent: "")
+    
+    let notThrottledImage = NSImage(named:NSImage.Name("StatusBarButtonImageNotThrottled"))
+    let throttledImage = NSImage(named:NSImage.Name("StatusBarButtonImageThrottled"))
     
     var throttled = false
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
-            button.image = NSImage(named:NSImage.Name("StatusBarButtonImage"))
+            button.image = notThrottledImage
         }
         
         constructMenu()
@@ -49,9 +53,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
                         let range = Range(matchedLimit, in: str)
                         let cpuLimit = Int(str[range!])!
                         if (cpuLimit < 95 && !self.throttled) {
+                            self.updateApplicationMenu(isThrottled:true, cpuLimit:cpuLimit)
                             self.showThrottledNotification()
                             self.throttled = true
                         } else if (cpuLimit >= 95 && self.throttled) {
+                            self.updateApplicationMenu(isThrottled:false)
                             self.showNormalNotification()
                             self.throttled = false
                         }
@@ -84,6 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
     
     func constructMenu() {
         let menu = NSMenu()
+        menu.addItem(statusMenuItem)
         menu.addItem(NSMenuItem(
             title: "Quit CPU Throttle Notifier",
             action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -105,6 +112,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         notification.soundName = NSUserNotificationDefaultSoundName
         NSUserNotificationCenter.default.delegate = self
         NSUserNotificationCenter.default.deliver(notification)
+    }
+    
+    func updateApplicationMenu(isThrottled: Bool, cpuLimit: Int? = nil) -> Void {
+        if let button = statusItem.button {
+            button.image = isThrottled ? throttledImage : notThrottledImage
+        }
+        
+        statusMenuItem.title = isThrottled && cpuLimit != nil ? "CPU is being throttled at \(cpuLimit!)%" : "CPU is not being throttled"
     }
     
     func userNotificationCenter(_ center: NSUserNotificationCenter, shouldPresent notification: NSUserNotification) -> Bool {
